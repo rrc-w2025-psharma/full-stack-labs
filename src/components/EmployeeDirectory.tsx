@@ -1,9 +1,12 @@
-import employeesData from "../data/employees.json";
 import type { Department } from "../types/Employee";
 
-export function EmployeeDirectory() {
-    const departments: Department[] = employeesData;
+interface EmployeeDirectoryProps {
+    departments: Department[];
+}
 
+export function EmployeeDirectory({
+    departments,
+}: EmployeeDirectoryProps) {
     return (
         <main>
             {departments.map((department) => (
@@ -11,8 +14,14 @@ export function EmployeeDirectory() {
                     <h2>{department.name}</h2>
 
                     <ul>
-                        {department.employees.map((employee) => (
-                            <li key={employee.firstName + employee.lastName}>
+                        {department.employees.map((employee, index) => (
+                            <li
+                                key={
+                                    employee.firstName +
+                                    employee.lastName +
+                                    index
+                                }
+                            >
                                 {employee.firstName} {employee.lastName}
                             </li>
                         ))}
