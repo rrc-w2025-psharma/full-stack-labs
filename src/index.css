@@ -60,3 +60,25 @@ footer {
     border-top: 1px solid #ccc;
     background-color: white;
 }
+.organization {
+    padding: 24px;
+}
+
+.organization-list {
+    max-width: 900px;
+}
+
+.organization-row {
+    display: grid;
+    grid-template-columns: 300px 1fr;
+    padding: 8px 0;
+    border-bottom: 1px solid #ccc;
+}
+
+nav {
+    padding: 12px 24px;
+}
+
+nav a {
+    margin-right: 16px;
+}

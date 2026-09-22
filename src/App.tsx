@@ -1,8 +1,9 @@
 import { useState } from "react";
-import { Header } from "./components/Header";
-import { EmployeeDirectory } from "./components/EmployeeDirectory";
-import { AddEmployeeForm } from "./components/AddEmployeeForm";
-import { Footer } from "./components/Footer";
+import { Routes, Route } from "react-router-dom";
+
+import { Layout } from "./components/Layout";
+import { Employees } from "./components/Employees";
+import { Organization } from "./components/Organization";
 
 import employeesData from "./data/employees.json";
 import type { Department, Employee } from "./types/Employee";
@@ -11,13 +12,19 @@ function App() {
     const [departments, setDepartments] =
         useState<Department[]>(employeesData);
 
-    function addEmployee(employee: Employee, departmentName: string) {
+    function addEmployee(
+        employee: Employee,
+        departmentName: string
+    ) {
         setDepartments((currentDepartments) =>
             currentDepartments.map((department) => {
                 if (department.name === departmentName) {
                     return {
                         ...department,
-                        employees: [...department.employees, employee],
+                        employees: [
+                            ...department.employees,
+                            employee,
+                        ],
                     };
                 }
 
@@ -27,18 +34,34 @@ function App() {
     }
 
     return (
-        <>
-            <Header />
+        <Routes>
+            <Route element={<Layout />}>
+                <Route
+                    index
+                    element={
+                        <Employees
+                            departments={departments}
+                            onAddEmployee={addEmployee}
+                        />
+                    }
+                />
 
-            <EmployeeDirectory departments={departments} />
+                <Route
+                    path="/employees"
+                    element={
+                        <Employees
+                            departments={departments}
+                            onAddEmployee={addEmployee}
+                        />
+                    }
+                />
 
-            <AddEmployeeForm
-                departments={departments}
-                onAddEmployee={addEmployee}
-            />
-
-            <Footer />
-        </>
+                <Route
+                    path="/organization"
+                    element={<Organization />}
+                />
+            </Route>
+        </Routes>
     );
 }
 
