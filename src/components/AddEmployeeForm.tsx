@@ -1,54 +1,42 @@
-import { useState } from "react";
-import type { Department, Employee } from "../types/Employee";
+import type { FormEvent } from "react";
+import type { Department } from "../types/Employee";
+import { useFormInput } from "../hooks/useFormInput";
+import { employeeService } from "../services/employeeService";
 
 interface AddEmployeeFormProps {
     departments: Department[];
-    onAddEmployee: (
-        employee: Employee,
-        departmentName: string
-    ) => void;
+    onAddEmployee: () => void;
 }
 
 export function AddEmployeeForm({
     departments,
     onAddEmployee,
 }: AddEmployeeFormProps) {
-    const [firstName, setFirstName] = useState("");
-    const [departmentName, setDepartmentName] = useState("");
-    const [errors, setErrors] = useState<string[]>([]);
+    const firstName = useFormInput();
+    const departmentName = useFormInput();
 
-    function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
+    function handleSubmit(event: FormEvent<HTMLFormElement>) {
         event.preventDefault();
 
-        // Clear previous validation messages
-        setErrors([]);
+        // The service checks the business rules and creates the employee.
+        const result = employeeService.createEmployee(
+            { firstName: firstName.value },
+            departmentName.value
+        );
 
-        const newErrors: string[] = [];
+        // The hooks manage the validation messages.
+        firstName.validate(() => result.errors.firstName);
+        departmentName.validate(() => result.errors.department);
 
-        if (firstName.trim().length < 3) {
-            newErrors.push(
-                "First name must be at least 3 characters."
-            );
-        }
-
-        if (!departmentName) {
-            newErrors.push("Please select a department.");
-        }
-
-        if (newErrors.length > 0) {
-            setErrors(newErrors);
+        if (!result.success) {
             return;
         }
 
-        onAddEmployee(
-            {
-                firstName: firstName.trim(),
-            },
-            departmentName
-        );
+        // Tell the parent to refresh its employee display.
+        onAddEmployee();
 
-        setFirstName("");
-        setDepartmentName("");
+        firstName.reset();
+        departmentName.reset();
     }
 
     return (
@@ -57,35 +45,33 @@ export function AddEmployeeForm({
 
             <form onSubmit={handleSubmit}>
                 <div>
-                    <label htmlFor="firstName">
-                        First Name:
-                    </label>
+                    <label htmlFor="firstName">First Name:</label>
 
                     <input
                         id="firstName"
                         type="text"
-                        value={firstName}
+                        value={firstName.value}
                         onChange={(event) =>
-                            setFirstName(event.target.value)
+                            firstName.setValue(event.target.value)
                         }
                     />
+
+                    {firstName.messages.map((message) => (
+                        <p key={message}>{message}</p>
+                    ))}
                 </div>
 
                 <div>
-                    <label htmlFor="department">
-                        Department:
-                    </label>
+                    <label htmlFor="department">Department:</label>
 
                     <select
                         id="department"
-                        value={departmentName}
+                        value={departmentName.value}
                         onChange={(event) =>
-                            setDepartmentName(event.target.value)
+                            departmentName.setValue(event.target.value)
                         }
                     >
-                        <option value="">
-                            Select a department
-                        </option>
+                        <option value="">Select a department</option>
 
                         {departments.map((department) => (
                             <option
@@ -96,19 +82,13 @@ export function AddEmployeeForm({
                             </option>
                         ))}
                     </select>
+
+                    {departmentName.messages.map((message) => (
+                        <p key={message}>{message}</p>
+                    ))}
                 </div>
 
-                {errors.length > 0 && (
-                    <ul>
-                        {errors.map((error) => (
-                            <li key={error}>{error}</li>
-                        ))}
-                    </ul>
-                )}
-
-                <button type="submit">
-                    Add Employee
-                </button>
+                <button type="submit">Add Employee</button>
             </form>
         </section>
     );

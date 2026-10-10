@@ -5,32 +5,16 @@ import { Layout } from "./components/Layout";
 import { Employees } from "./components/Employees";
 import { Organization } from "./components/Organization";
 
-import employeesData from "./data/employees.json";
-import type { Department, Employee } from "./types/Employee";
+import { employeeRepo } from "./repositories/employeeRepo";
+import type { Department } from "./types/Employee";
 
 function App() {
-    const [departments, setDepartments] =
-        useState<Department[]>(employeesData);
+    const [departments, setDepartments] = useState<Department[]>(
+        () => employeeRepo.getDepartments()
+    );
 
-    function addEmployee(
-        employee: Employee,
-        departmentName: string
-    ) {
-        setDepartments((currentDepartments) =>
-            currentDepartments.map((department) => {
-                if (department.name === departmentName) {
-                    return {
-                        ...department,
-                        employees: [
-                            ...department.employees,
-                            employee,
-                        ],
-                    };
-                }
-
-                return department;
-            })
-        );
+    function refreshEmployees() {
+        setDepartments(employeeRepo.getDepartments());
     }
 
     return (
@@ -41,7 +25,7 @@ function App() {
                     element={
                         <Employees
                             departments={departments}
-                            onAddEmployee={addEmployee}
+                            onAddEmployee={refreshEmployees}
                         />
                     }
                 />
@@ -51,7 +35,7 @@ function App() {
                     element={
                         <Employees
                             departments={departments}
-                            onAddEmployee={addEmployee}
+                            onAddEmployee={refreshEmployees}
                         />
                     }
                 />

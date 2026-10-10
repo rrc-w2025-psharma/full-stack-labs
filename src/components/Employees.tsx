@@ -1,13 +1,10 @@
-import type { Department, Employee } from "../types/Employee";
+import type { Department } from "../types/Employee";
 import { EmployeeDirectory } from "./EmployeeDirectory";
 import { AddEmployeeForm } from "./AddEmployeeForm";
 
 interface EmployeesProps {
     departments: Department[];
-    onAddEmployee: (
-        employee: Employee,
-        departmentName: string
-    ) => void;
+    onAddEmployee: () => void;
 }
 
 export function Employees({
