@@ -1,6 +1,17 @@
-import { roles } from "../data/roles";
+import { useState } from "react";
+import { organizationRepo } from "../repositories/organizationRepo";
+import { AddRoleForm } from "./AddRoleForm";
+import type { Role } from "../types/Role";
 
 export function Organization() {
+    const [roles, setRoles] = useState<Role[]>(
+        () => organizationRepo.getRoles()
+    );
+
+    function refreshRoles() {
+        setRoles(organizationRepo.getRoles());
+    }
+
     return (
         <main className="organization">
             <h2>Organization</h2>
@@ -9,7 +20,7 @@ export function Organization() {
                 {roles.map((person) => (
                     <div
                         className="organization-row"
-                        key={person.firstName + person.lastName}
+                        key={person.role}
                     >
                         <span>
                             {person.firstName} {person.lastName}
@@ -19,6 +30,8 @@ export function Organization() {
                     </div>
                 ))}
             </div>
+
+            <AddRoleForm onAddRole={refreshRoles} />
         </main>
     );
 }
