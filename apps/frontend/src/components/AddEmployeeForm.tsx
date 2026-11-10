@@ -15,28 +15,31 @@ export function AddEmployeeForm({
     const firstName = useFormInput();
     const departmentName = useFormInput();
 
-    function handleSubmit(event: FormEvent<HTMLFormElement>) {
+    async function handleSubmit(event: FormEvent<HTMLFormElement>) {
         event.preventDefault();
 
-        // The service checks the business rules and creates the employee.
-        const result = employeeService.createEmployee(
-            { firstName: firstName.value },
-            departmentName.value
-        );
+        try {
+            const result = await employeeService.createEmployee(
+                { firstName: firstName.value },
+                departmentName.value
+            );
 
-        // The hooks manage the validation messages.
-        firstName.validate(() => result.errors.firstName);
-        departmentName.validate(() => result.errors.department);
+            firstName.validate(() => result.errors.firstName);
+            departmentName.validate(() => result.errors.department);
 
-        if (!result.success) {
-            return;
+            if (!result.success) {
+                return;
+            }
+
+            onAddEmployee();
+            firstName.reset();
+            departmentName.reset();
+        } catch (error) {
+            console.error("Failed to create employee:", error);
+            firstName.validate(() => [
+                "Unable to save employee. Check the backend connection."
+            ]);
         }
-
-        // Tell the parent to refresh its employee display.
-        onAddEmployee();
-
-        firstName.reset();
-        departmentName.reset();
     }
 
     return (

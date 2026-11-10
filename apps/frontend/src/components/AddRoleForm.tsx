@@ -11,28 +11,34 @@ export function AddRoleForm({ onAddRole }: AddRoleFormProps) {
     const lastName = useFormInput();
     const role = useFormInput();
 
-    function handleSubmit(event: FormEvent<HTMLFormElement>) {
+    async function handleSubmit(event: FormEvent<HTMLFormElement>) {
         event.preventDefault();
 
-        const result = organizationService.createRole({
-            firstName: firstName.value,
-            lastName: lastName.value,
-            role: role.value,
-        });
+        try {
+            const result = await organizationService.createRole({
+                firstName: firstName.value,
+                lastName: lastName.value,
+                role: role.value,
+            });
 
-        firstName.validate(() => result.errors.firstName);
-        lastName.validate(() => result.errors.lastName);
-        role.validate(() => result.errors.role);
+            firstName.validate(() => result.errors.firstName);
+            lastName.validate(() => result.errors.lastName);
+            role.validate(() => result.errors.role);
 
-        if (!result.success) {
-            return;
+            if (!result.success) {
+                return;
+            }
+
+            onAddRole();
+            firstName.reset();
+            lastName.reset();
+            role.reset();
+        } catch (error) {
+            console.error("Failed to create role:", error);
+            role.validate(() => [
+                "Unable to save role. Check the backend connection."
+            ]);
         }
-
-        onAddRole();
-
-        firstName.reset();
-        lastName.reset();
-        role.reset();
     }
 
     return (
