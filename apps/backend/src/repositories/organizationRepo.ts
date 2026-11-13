@@ -1,31 +1,42 @@
-import { roles } from "../data/roles.js";
+import { prisma } from "../lib/prisma.js";
 import type { Role } from "../types/Role.js";
 
-let organizationRecords: Role[] = structuredClone(roles);
-
 export const organizationRepo = {
-  getRoles(): Role[] {
-    return structuredClone(organizationRecords);
+  async getRoles(): Promise<Role[]> {
+    return prisma.role.findMany({
+      select: {
+        firstName: true,
+        lastName: true,
+        role: true,
+      },
+      orderBy: { id: "asc" },
+    });
   },
 
-  createRole(person: Role): Role[] {
-    organizationRecords = [...organizationRecords, person];
+  async createRole(person: Role): Promise<Role[]> {
+    await prisma.role.create({
+      data: person,
+    });
 
     return this.getRoles();
   },
 
-  updateRole(oldRole: string, updatedPerson: Role): Role[] {
-    organizationRecords = organizationRecords.map((person) =>
-      person.role === oldRole ? updatedPerson : person
-    );
+  async updateRole(
+    oldRole: string,
+    updatedPerson: Role
+  ): Promise<Role[]> {
+    await prisma.role.update({
+      where: { role: oldRole },
+      data: updatedPerson,
+    });
 
     return this.getRoles();
   },
 
-  deleteRole(roleName: string): Role[] {
-    organizationRecords = organizationRecords.filter(
-      (person) => person.role !== roleName
-    );
+  async deleteRole(roleName: string): Promise<Role[]> {
+    await prisma.role.delete({
+      where: { role: roleName },
+    });
 
     return this.getRoles();
   },

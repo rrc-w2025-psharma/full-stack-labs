@@ -32,3 +32,11 @@ dist-ssr
 **/dist/
 **/node_modules/
 *.tsbuildinfo
+
+# Prisma generated client
+/apps/backend/src/generated/
+
+# Environment variables
+.env
+.env.*
+!.env.example

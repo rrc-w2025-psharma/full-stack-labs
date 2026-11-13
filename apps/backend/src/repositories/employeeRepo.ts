@@ -1,26 +1,41 @@
-import employeesData from "../data/employees.json" with { type: "json" };
+import { prisma } from "../lib/prisma.js";
 import type { Department, Employee } from "../types/Employee.js";
 
-let departments: Department[] = structuredClone(employeesData);
-
 export const employeeRepo = {
-  getDepartments(): Department[] {
-    return structuredClone(departments);
+  async getDepartments(): Promise<Department[]> {
+    return prisma.department.findMany({
+      select: {
+        name: true,
+        employees: {
+          select: {
+            firstName: true,
+            lastName: true,
+          },
+          orderBy: { id: "asc" },
+        },
+      },
+      orderBy: { id: "asc" },
+    });
   },
 
-  createEmployee(
+  async createEmployee(
     employee: Employee,
     departmentName: string
-  ): Department[] {
-    departments = departments.map((department) => {
-      if (department.name === departmentName) {
-        return {
-          ...department,
-          employees: [...department.employees, employee],
-        };
-      }
+  ): Promise<Department[]> {
+    const department = await prisma.department.findUnique({
+      where: { name: departmentName },
+    });
 
-      return department;
+    if (!department) {
+      throw new Error("Department not found");
+    }
+
+    await prisma.employee.create({
+      data: {
+        firstName: employee.firstName,
+        lastName: employee.lastName,
+        departmentId: department.id,
+      },
     });
 
     return this.getDepartments();

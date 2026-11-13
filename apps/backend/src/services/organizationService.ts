@@ -11,43 +11,35 @@ interface CreateRoleResult {
 }
 
 export const organizationService = {
-  getRoles(): Role[] {
+  async getRoles(): Promise<Role[]> {
     return organizationRepo.getRoles();
   },
 
-  createRole(person: Role): CreateRoleResult {
+  async createRole(person: Role): Promise<CreateRoleResult> {
     const errors = {
       firstName: [] as string[],
       lastName: [] as string[],
       role: [] as string[],
     };
 
-    if (
-      typeof person.firstName !== "string" ||
-      person.firstName.trim().length < 3
-    ) {
-      errors.firstName.push(
-        "First name must be at least 3 characters."
-      );
+    if (typeof person?.firstName !== "string" ||
+        person.firstName.trim().length < 3) {
+      errors.firstName.push("First name must be at least 3 characters.");
     }
 
-    if (
-      typeof person.lastName !== "string" ||
-      !person.lastName.trim()
-    ) {
+    if (typeof person?.lastName !== "string" ||
+        !person.lastName.trim()) {
       errors.lastName.push("Last name is required.");
     }
 
-    if (
-      typeof person.role !== "string" ||
-      !person.role.trim()
-    ) {
+    if (typeof person?.role !== "string" ||
+        !person.role.trim()) {
       errors.role.push("Role is required.");
     }
 
-    const existingRoles = organizationRepo.getRoles();
+    const existingRoles = await organizationRepo.getRoles();
 
-    if (typeof person.role === "string") {
+    if (typeof person?.role === "string") {
       const roleOccupied = existingRoles.some(
         (existingPerson) =>
           existingPerson.role.toLowerCase() ===
@@ -59,26 +51,18 @@ export const organizationService = {
       }
     }
 
-    if (
-      errors.firstName.length > 0 ||
-      errors.lastName.length > 0 ||
-      errors.role.length > 0
-    ) {
-      return {
-        success: false,
-        errors,
-      };
+    if (errors.firstName.length ||
+        errors.lastName.length ||
+        errors.role.length) {
+      return { success: false, errors };
     }
 
-    organizationRepo.createRole({
+    await organizationRepo.createRole({
       firstName: person.firstName.trim(),
       lastName: person.lastName.trim(),
       role: person.role.trim(),
     });
 
-    return {
-      success: true,
-      errors,
-    };
+    return { success: true, errors };
   },
 };
